@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 Command = require('commander').Command;
 spawnSync = require('child_process').spawnSync;
 
