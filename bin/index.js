@@ -1,5 +1,5 @@
-import { Command } from 'commander';
-import { spawnSync } from "child_process";
+Command = require('commander').Command;
+spawnSync = require('child_process').spawnSync;
 
 const program = new Command();
 program
