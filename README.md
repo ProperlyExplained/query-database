@@ -29,7 +29,7 @@ Table 3
 
 
 
-$ qd -w 'x like "%HelloWorld%"' -d my-database -- -uroot -proot
+$ query-database -w 'x like "%HelloWorld%"' -d my-database -- -uroot -proot
 +------------------+--------+---------+
 | Sample data      | Table  | Column  |
 +------------------+--------+---------+
@@ -37,7 +37,7 @@ $ qd -w 'x like "%HelloWorld%"' -d my-database -- -uroot -proot
 | xxxHelloWorldyyy | Table2 | column4 |
 +------------------+--------+---------+
 
-$ qd -w 'x > 10' -d my-database -- -uroot -proot
+$ query-database -w 'x > 10' -d my-database -- -uroot -proot
 +-------------+--------+---------+
 | Sample data | Table  | Column  |
 +-------------+--------+---------+
@@ -47,8 +47,8 @@ $ qd -w 'x > 10' -d my-database -- -uroot -proot
 
 
 
-$ qd --help
-Usage: qd [options]
+$ query-database --help
+Usage: query-database [options]
 
 Options:
   -w, --where <where>             The column name is 'x'
@@ -60,11 +60,11 @@ Options:
   -h, --help                      display help for command
 
 Examples:
-qd -w 'x like "%HelloWorld%"' -d my-database -- -uroot -proot
-qd -w 'x like "%HelloWorld%"' -d my-database --executable=/absolute/path/to/mysql -- -uroot -proot
-qd -w 'x like "%HelloWorld%"' -d my-database --docker-compose=mysql -- -uroot -proot
-qd -w 'x like "%HelloWorld%"' -d my-database --docker-compose=mysql --executable=/absolute/path/to/mysql/inside/docker -- -uroot -proot
-qd -w 'x like "%HelloWorld%"' -d my-database -c 20 -- -uroot -proot
+query-database -w 'x like "%HelloWorld%"' -d my-database -- -uroot -proot
+query-database -w 'x like "%HelloWorld%"' -d my-database --executable=/absolute/path/to/mysql -- -uroot -proot
+query-database -w 'x like "%HelloWorld%"' -d my-database --docker-compose=mysql -- -uroot -proot
+query-database -w 'x like "%HelloWorld%"' -d my-database --docker-compose=mysql --executable=/absolute/path/to/mysql/inside/docker -- -uroot -proot
+query-database -w 'x like "%HelloWorld%"' -d my-database -c 20 -- -uroot -proot
 ```
 
 ## Install

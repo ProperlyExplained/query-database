@@ -12,11 +12,11 @@ program
     .option('-- <params...>', 'Parameters passed to mysql')
     .addHelpText('after',`
 Examples:
-qd -w 'x like "%HelloWorld%"' -d my-database -- -uroot -proot
-qd -w 'x like "%HelloWorld%"' -d my-database --executable=/absolute/path/to/mysql -- -uroot -proot
-qd -w 'x like "%HelloWorld%"' -d my-database --docker-compose=mysql -- -uroot -proot
-qd -w 'x like "%HelloWorld%"' -d my-database --docker-compose=mysql --executable=/absolute/path/to/mysql/inside/docker -- -uroot -proot
-qd -w 'x like "%HelloWorld%"' -d my-database -c 20 -- -uroot -proot
+query-database -w 'x like "%HelloWorld%"' -d my-database -- -uroot -proot
+query-database -w 'x like "%HelloWorld%"' -d my-database --executable=/absolute/path/to/mysql -- -uroot -proot
+query-database -w 'x like "%HelloWorld%"' -d my-database --docker-compose=mysql -- -uroot -proot
+query-database -w 'x like "%HelloWorld%"' -d my-database --docker-compose=mysql --executable=/absolute/path/to/mysql/inside/docker -- -uroot -proot
+query-database -w 'x like "%HelloWorld%"' -d my-database -c 20 -- -uroot -proot
 `);
 
 program.parse();
