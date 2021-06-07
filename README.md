@@ -66,3 +66,9 @@ qd -w 'x like "%HelloWorld%"' -d my-database --docker-compose=mysql -- -uroot -p
 qd -w 'x like "%HelloWorld%"' -d my-database --docker-compose=mysql --executable=/absolute/path/to/mysql/inside/docker -- -uroot -proot
 qd -w 'x like "%HelloWorld%"' -d my-database -c 20 -- -uroot -proot
 ```
+
+## Install
+
+```
+npm install -g query-database
+```
