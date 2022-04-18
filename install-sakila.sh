@@ -1,3 +1,4 @@
+#!/bin/bash
 containerId=$(docker container run --rm -d -e MYSQL_ROOT_PASSWORD=root mysql)
 wget https://downloads.mysql.com/docs/sakila-db.zip
 unzip sakila-db.zip
