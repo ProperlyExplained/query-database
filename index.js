@@ -1,88 +1,94 @@
-#!/usr/bin/env node
-Command = require('commander').Command;
-spawnSync = require('child_process').spawnSync;
+const process = require('process');
+const yargs = require('yargs');
+const { hideBin } = require('yargs/helpers');
 
-const program = new Command();
-program
-    .requiredOption('-w, --where <where>', "The column name is 'x'")
-    .requiredOption('-d, --database <database>')
-    .option('-c, --context <num-characters>', 'Maximum width of the Data column in the output. If zero, the column \'data\' is omitted from the output', '100')
-    .option('-e, --executable <executable>', undefined, 'mysql')
-    .option('-D, --docker-compose <service>', 'The name of the docker-compose.yml service that represent mysql')
-    .option('-- <params...>', 'Parameters passed to mysql')
-    .addHelpText('after',`
-Examples:
-query-database -w 'x like "%HelloWorld%"' -d my-database -- -uroot -proot
-query-database -w 'x like "%HelloWorld%"' -d my-database --executable=/absolute/path/to/mysql -- -uroot -proot
-query-database -w 'x like "%HelloWorld%"' -d my-database --docker-compose=mysql -- -uroot -proot
-query-database -w 'x like "%HelloWorld%"' -d my-database --docker-compose=mysql --executable=/absolute/path/to/mysql/inside/docker -- -uroot -proot
-query-database -w 'x like "%HelloWorld%"' -d my-database -c 20 -- -uroot -proot
-`);
+const argv = yargs(hideBin(process.argv))
+.usage('Execute a query that runs in all columns of all tables and return the tables, columns and rows. Like Ctrl+Shift+F in some code editors, but with a database.')
+.options({
+  host: {
+    alias: 'H',
+    default: 'localhost',
+    string: true
+  },
+  user: {
+    alias: 'u',
+    default: 'root',
+    string: true
+  },
+  password: {
+    alias: 'p',
+    default: 'root',
+    string: true
+  },
+  database: {
+    alias: 'D',
+    string: true,
+    demandOption: true
+  },
+  port: {
+    alias: 'P',
+    default: 3306,
+    number: true
+  },
+  format: {
+    alias: 'F',
+    default: 'json',
+    choices: ['json', 'table'],
+  },
+  where: {
+    alias: 'w',
+    string: true,
+    demandOption: true,
+    description: 'Filter to use in WHERE'
+  },
+  columnAlias: {
+    alias: 'c',
+    string: true,
+    default: 'x',
+    description: 'Alias to reference the column name'
+  }
+}).example(
+  `$0 -D sakila -w '\`x\` like "%Michael%"'`,
+  'Find all tables containing "Michael" in any row in any column and list for each table the colums and for each column the rows containing "Michael."'
+).strict()
+.argv;
 
-program.parse();
-const options = program.opts();
+const mysql = require('mysql2/promise');
 
-let contextColumn = options.context > 0 ? `substring(x, 1, ${options.context}) as \`Sample data\`,` : '';
-let query =
-`select concat(
-    'select ${contextColumn} T as \`Table\`, C as \`Column\` from (',
-    group_concat(
-        concat(
-            '(select \`',
-            column_name,
-            '\` as X, "',
-            table_name,
-            '" as T, "',
-            column_name,
-            '" as C from ',
-            table_name,
-            ' having ${options.where} limit 1)'
-        ) separator ' union '
-    ),
-    ') as TX;'
-) from information_schema.columns where table_schema = '${options.database}'`;
+(async () => {
+  const connection = await mysql.createConnection({
+    host: argv.host,
+    user: argv.user,
+    password: argv.password,
+    database: argv.database,
+    rowsAsArray: true
+  });
+  const output = {};
+  let [result] = await connection.query('show tables');
+  const tables = result.map(r => r[0]);
+  for (const table of tables) {
+    output[table] = {};
+    [result] = await connection.query(`describe \`${table}\``);
+    const columns = result.map(r => r[0]);
+    for (const column of columns) {
+      try {
+        [result] = await connection.query(`select \`${column}\` as \`${argv.columnAlias}\` from \`${table}\` having ${argv.where}`);
+        if(result.length) {
+          output[table][column] = result.map(r => r[0]);
+        }
+      } catch (error) {}
+    }
+    if(!Object.keys(output[table]).length) {
+      delete output[table];
+    }
+  }
 
-let mysql = options.dockerCompose ?
-    spawnSync(
-        'docker-compose', [
-            'exec',
-            '-T',
-            options.dockerCompose,
-            options.executable,
-            ...program.args,
-            '--silent',
-            '--skip-column-names',
-            `--execute=set session group_concat_max_len=4294967295; ${query}`
-        ]
-    ) :
-    spawnSync(
-        options.executable, [
-            ...program.args,
-            '--silent',
-            '--skip-column-names',
-            `--execute=set session group_concat_max_len=4294967295; ${query}`
-        ]
-    );
+  connection.end();
 
-if(options.dockerCompose) {
-    spawnSync(
-        'docker-compose', [
-            'exec',
-            options.dockerCompose,
-            options.executable,
-            ...program.args,
-            `--execute=${mysql.stdout.toString()}`,
-            options.database
-        ],
-        {stdio: 'inherit'}
-    );
-} else {
-    spawnSync(
-        options.executable, [
-            ...program.args,
-            `--execute=${mysql.stdout.toString()}`,
-            options.database
-        ],
-        {stdio: 'inherit'}
-    );
-}
+  if(argv.format == 'json') {
+    console.log(JSON.stringify(output, null, '    '));
+  } else {
+    console.table(output);
+  }
+
+})();
