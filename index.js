@@ -3,7 +3,8 @@ const yargs = require('yargs');
 const { hideBin } = require('yargs/helpers');
 
 const argv = yargs(hideBin(process.argv))
-.usage('Execute a query that runs in all columns of all tables and return the tables, columns and rows. Like Ctrl+Shift+F in some code editors, but with a database.')
+.usage('Execute a query that runs in all columns of all tables and return the tables, columns and rows.\nLike Ctrl+Shift+F in some code editors, but with a database.')
+.wrap(128)
 .options({
   host: {
     alias: 'H',
@@ -49,7 +50,10 @@ const argv = yargs(hideBin(process.argv))
   }
 }).example(
   `$0 -D sakila -w '\`x\` like "%Michael%"'`,
-  'Find all tables containing "Michael" in any row in any column and list for each table the colums and for each column the rows containing "Michael."'
+  'Find all tables containing "Michael" in any row in any column and list for each table the colums and for each column the rows containing "Michael."\n'
+).example(
+  `$0 -D sakila -c 'column' -w '\`column\` like "%Michael%"'`,
+  'Same thing but using another name to reference the column'
 ).strict()
 .argv;
 
