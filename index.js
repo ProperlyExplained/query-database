@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 const process = require('process');
 const yargs = require('yargs');
 const { hideBin } = require('yargs/helpers');
